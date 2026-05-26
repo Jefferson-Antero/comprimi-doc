@@ -110,8 +110,9 @@ app.post('/compress', upload.single('file'), async (req, res) => {
   }
 
   const inputPath = req.file.path;
-  const ext = path.extname(req.file.originalname).toLowerCase();
-  const rawName = path.basename(req.file.originalname, ext);
+  const decodedName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+  const ext = path.extname(decodedName).toLowerCase();
+  const rawName = path.basename(decodedName, ext);
   const originalName = sanitizeName(rawName);
 
   const isDoc = ext === '.doc';
