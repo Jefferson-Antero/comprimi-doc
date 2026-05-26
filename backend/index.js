@@ -110,7 +110,11 @@ app.post('/compress', upload.single('file'), async (req, res) => {
   }
 
   const inputPath = req.file.path;
-  const decodedName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+  // multer/busboy may decode filename bytes as latin1 when browser sends UTF-8 — detect and fix
+  const latin1Attempt = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+  const decodedName = !latin1Attempt.includes('�') && latin1Attempt !== req.file.originalname
+    ? latin1Attempt
+    : req.file.originalname;
   const ext = path.extname(decodedName).toLowerCase();
   const rawName = path.basename(decodedName, ext);
   const originalName = sanitizeName(rawName);
